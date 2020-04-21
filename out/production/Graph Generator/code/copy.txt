@@ -1,0 +1,37 @@
+package code;
+
+import javax.swing.*;
+import java.awt.image.BufferedImage;
+
+public class MainWindow extends JFrame {
+    private JPanel mainPanel;
+    private JButton generateButton;
+    private JLabel graphLabel;
+    private JTextField functionField;
+    private BufferedImage buffGraph;
+
+    public MainWindow(BufferedImage buffGraph) {
+        mainPanel = new JPanel();
+        mainPanel.setSize(600, 600);
+        this.add(mainPanel);
+
+        generateButton = new JButton("Generate");
+        mainPanel.add(generateButton);
+
+        this.buffGraph = buffGraph;
+
+        graphLabel = new JLabel(new ImageIcon(this.buffGraph));
+        mainPanel.add(graphLabel);
+
+        functionField = new JTextField();
+        mainPanel.add(functionField);
+
+        this.setDefaultCloseOperation(EXIT_ON_CLOSE);
+        this.setContentPane(mainPanel);
+        this.pack();
+        this.setVisible(true);
+    }
+
+    public void setGraph(BufferedImage graph) {
+        graphLabel.setIcon(new ImageIcon(graph));
+    }

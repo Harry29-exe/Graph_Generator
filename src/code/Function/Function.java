@@ -3,10 +3,13 @@ package code.Function;
 import code.Function.Eqation.*;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 public class Function {
-    int openedBraces = 0;
-    ArrayList<Double> variableList;
+    private ArrayList<Double> constantList;
+    public ArrayList<Integer> simpleFunction;
+
+    private ArrayList<Equation> function = new ArrayList<>();
 
     private final int OPENING_BRACE = -1;
     private final int CLOSING_BRACE = -2;
@@ -15,30 +18,77 @@ public class Function {
     private final int MULTIPLICATION = -5;
     private final int DIVISION = -6;
     private final int POWER = -7;
+    private final int BLANK = -8;
 
 
 
-    public Function(String function) {
-        variableList = getVariableList(function);
-
+    public Function(String stringFunction) throws InvalidFunctionException {
+        constantList = getConstantList(stringFunction);
+        System.out.println(constantList);
+        simpleFunction = createSimpleFunction(stringFunction.toCharArray());
+        System.out.println(simpleFunction);
+        LinkedList<EquationNode> equationNodes = simpleFunctionToEquationNodes(simpleFunction);
+        System.out.println("ok1");
+        for(EquationNode node: equationNodes) {
+            function.add(createEquation(node.getOperatorIndex(), simpleFunction));
+        }
+        System.out.println("ok2");
     }
 
-    public EquationList simpleFunctionToEquationList(ArrayList<Integer> simpleFunction) throws InvalidFunctionException {
-        EquationList equations = new EquationList();
+    public double getValueFor(double x) {
+        Double[] vL = new Double[this.constantList.size()];
+        for(int i = 0; i< this.constantList.size(); i++) {
+            if(this.constantList.get(i) != null) {
+                vL[i] = this.constantList.get(i);
+            } else {
+                vL[i] = x;
+            }
+        }
+        for(Equation equation: function) {
+            int varIndex1 = equation.neededVariablesIndexes()[0];
+            int varIndex2 = equation.neededVariablesIndexes()[1];
+            vL[varIndex2] = equation.result(vL[varIndex1], vL[varIndex2]);
+        }
+        return vL[vL.length - 1];
+    }
+
+    public Equation createEquation(int operatorIndex, ArrayList<Integer> simpleFunction) {
+        int varIndex1 = getClosestVarBehindOf(operatorIndex);
+        int varIndex2 = getClosestVarAheadOf(operatorIndex);
+        Equation equation;
+        switch (simpleFunction.get(operatorIndex)) {
+            case PLUS:
+                equation = new AdditionEquation(simpleFunction.get(varIndex1), simpleFunction.get(varIndex2));
+                break;
+            case MINUS:
+                equation = new SubtractionEquation(simpleFunction.get(varIndex1), simpleFunction.get(varIndex2));
+                break;
+            case DIVISION:
+                equation = new DivisionEquation(simpleFunction.get(varIndex1), simpleFunction.get(varIndex2));
+                break;
+            case MULTIPLICATION:
+                equation = new MultiplicationEquation(simpleFunction.get(varIndex1), simpleFunction.get(varIndex2));
+                break;
+            case POWER:
+                equation = new PowerEquation(simpleFunction.get(varIndex1), simpleFunction.get(varIndex2));
+                break;
+            default:
+                throw new IllegalArgumentException();
+        }
+
+        simpleFunction.set(varIndex1, BLANK);
+        simpleFunction.set(operatorIndex, BLANK);
+        return equation;
+    }
+
+    public LinkedList<EquationNode> simpleFunctionToEquationNodes(ArrayList<Integer> simpleFunction) throws InvalidFunctionException {
+        LinkedList<EquationNode> equationNodes = new LinkedList<>();
         int openedBraces = 0;
         int var1 = -1;
         int var2 = -1;
         for(int i = 0; i < simpleFunction.size(); i++) {
             int c = simpleFunction.get(i);
-            if(c >= 0) {
-                if(var1 != -1) {
-                    var1 = c;
-                } else if(var2 != -1) {
-                    var2 = c;
-                } else {
-                    throw new InvalidFunctionException();
-                }
-            } else if(c == OPENING_BRACE) {
+            if(c == OPENING_BRACE) {
                 openedBraces++;
             } else if(c == CLOSING_BRACE) {
                 if(openedBraces > 0) {
@@ -46,34 +96,19 @@ public class Function {
                 } else {
                     throw new InvalidFunctionException("The number of parentheses is not balanced");
                 }
-            } else {
-                switch (c) {
-                    case PLUS:
-                        equations.addEquation(new AdditionEquation());
-                        break;
-                    case MINUS:
-                        equations.addEquation(new SubstractionEqation());
-                        break;
-                    case MULTIPLICATION:
-                        equations.addEquation(new MultiplicationEqation());
-                        break;
-                    case DIVISION:
-                        equations.addEquation(new DivisionEqation());
-                        break;
-                    case POWER:
-                        equations.addEquation(new PowerEqation());
-                        break;
-                }
+            } else if (c < CLOSING_BRACE && c > BLANK ){
+                equationNodes.add(new EquationNode( calculatePriority(c, openedBraces), i));
             }
         }
+        equationNodes.sort(EquationNode::compareTo);
+        return equationNodes;
     }
 
-    private ArrayList<Double> getVariableList(String function) {
+    private ArrayList<Double> getConstantList(String function) {
         ArrayList<Double> arrayList = new ArrayList<>();
-
         for(int i = 0; i < function.length(); i++) {
             char c = function.charAt(i);
-            if(c == 'x' || c == 'X') {
+            if(c == 'x' | c == 'X') {
                 arrayList.add(null);
             } else if (c >= '0' && c <= '9' ) {
                 int temp = goToEndOfNumber(function, i);
@@ -84,17 +119,17 @@ public class Function {
         return arrayList;
     }
 
-    public ArrayList<Integer> createSimplifiedFunction(char[] function) {
+    public ArrayList<Integer> createSimpleFunction(char[] function) throws InvalidFunctionException{
         ArrayList<Integer> simpleFunction = new ArrayList<>();
         int variableCount = 0;
 
         for(int i = 0; i < function.length; i++) {
             char c = function[i];
             if( (c >= '0' && c <= '9') || c =='.') {
-                simpleFunction.add(++variableCount);
+                simpleFunction.add(variableCount++);
                 i = goToEndOfNumber(function, i) - 1;
             } else if(c == 'x' || c == 'X') {
-                simpleFunction.add(0);
+                simpleFunction.add(variableCount++);
             } else {
                 switch(c) {
                     case '(':
@@ -118,19 +153,54 @@ public class Function {
                     case '^':
                         simpleFunction.add(POWER);
                         break;
+                    case '.':
+                    case ' ':
+                        break;
+                    default:
+                        throw new InvalidFunctionException("Sorry I don't know what this sign:" + c + "means.");
                 }
             }
         }
         return simpleFunction;
     }
 
+    public int getClosestVarBehindOf(int index) {
+        int i = index;
+        while(simpleFunction.get(i) < 0 && simpleFunction.get(i) != null) {
+            i--;
+        }
+        return i;
+    }
+
+    public int getClosestVarAheadOf(int index) {
+        int i = index;
+        while(simpleFunction.get(i) < 0 && simpleFunction.get(i) != null) {
+            i++;
+        }
+        return i;
+    }
+
+    private int calculatePriority(int equationType, int openedBraces) {
+        int result = openedBraces * 3;
+        if(equationType == PLUS || equationType == MINUS) {
+            return result + 1;
+        } else if (equationType  == MULTIPLICATION || equationType == DIVISION) {
+            return result + 2;
+        } else if (equationType == POWER) {
+            return result + 3;
+        } else {
+            throw new IllegalArgumentException();
+        }
+
+    }
+
     private int goToEndOfNumber(String string, int fromN) throws IllegalArgumentException{
         boolean comaOccurred = false;
         while(true) {
             char c = string.charAt(fromN++);
-            if( (c > '9' || c < '0') && c != ',') {
+            if( (c > '9' || c < '0') && c != '.') {
                 return fromN - 1;
-            } else if (c == ',') {
+            } else if (c == '.') {
                 c = string.charAt(fromN++);
                 if(c < '0' || c > '9') {
                     throw new IllegalArgumentException("After the decimal point a digit must appear");
@@ -154,19 +224,33 @@ public class Function {
         }
     }
 
-    private int getPriority(char sign) {
-        int result = openedBraces * 3;
-        if(sign == '+' || sign == '-') {
-            return result + 1;
-        } else if (sign == '*' || sign == '/') {
-            return result + 2;
-        } else if (sign == '^') {
-            return result + 3;
-        } else {
-            throw new IllegalArgumentException();
+    private class EquationNode implements Comparable<EquationNode>{
+        private final int priority;
+        private final int operatorIndex;
+
+        @Override
+        public String toString() {
+            return new String("Priority:" + priority + " operator index: " + operatorIndex);
+        }
+        public EquationNode(int priority, int indexInSimpleFunction) {
+            this.priority = priority;
+            this.operatorIndex = indexInSimpleFunction;
         }
 
+        @Override
+        public int compareTo(EquationNode eNode) {
+            return eNode.getPriority() - this.priority;
+        }
+
+        public int getPriority() {
+            return priority;
+        }
+
+        public int getOperatorIndex() {
+            return operatorIndex;
+        }
     }
+
 }
 
 

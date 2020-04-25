@@ -1,24 +1,21 @@
 package code.Function.Eqation;
 
-import code.Function.Eqation.Equation;
-
-public class AdditionEquation implements Equation {
+public class SubtractionEquation implements Equation {
     int varIndex1;
     int varIndex2;
 
-    public AdditionEquation(int varIndex1, int varIndex2) {
+    public SubtractionEquation(int varIndex1, int varIndex2) {
         this.varIndex1 = varIndex1;
         this.varIndex2 = varIndex2;
     }
 
     @Override
     public int[] neededVariablesIndexes() {
-
         return new int[] {varIndex1, varIndex2};
     }
 
     @Override
     public double result(double var1, double var2) {
-        return var1 + var2;
+        return var1 - var2;
     }
 }

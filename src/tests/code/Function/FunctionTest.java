@@ -6,7 +6,6 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
 
 import static org.junit.Assert.*;
 
@@ -33,19 +32,36 @@ public class FunctionTest {
     }
 
     @Test
-    public void createSimplifiedFunction_exampleStringFunction_Test() {
-        ArrayList<Integer> expected = new ArrayList<>(Arrays.asList(-1,1, -3, 0, -4, 2, -2));
-        ArrayList<Integer> output = function.createSimplifiedFunction(exampleStringFunction.toCharArray());
-        if(expected.size() == output.size()) {
-            for (int i = 0; i < expected.size(); i++) {
-                assertEquals(expected.get(i), output.get(i));
-            }
-        } else {
-            throw new AssertionError("Excepted output length:" + expected.size() +
-                    "when output length is:" + output.size() + "\n" + output
-            );
-        }
+    public void getValueFor_Test() {
+        int x = 5;
+        System.out.println(function.simpleFunction);
+        System.out.println(function.getValueFor(x));
+        assertEquals(-20, function.getValueFor(x), 0.0001);
     }
 
+    @Test
+    public void getValueFor_Test1() {
+        exampleStringFunction = "(2 * x ^ 3 + x - 31)";
+        try {
+            function = new Function(exampleStringFunction);
+        } catch (InvalidFunctionException e) {
+            e.printStackTrace();
+        }
+        int x = 3;
+        assertEquals(26, function.getValueFor(x), 0.001);
+    }
+
+    @Test
+    public void getValueFor_Test2() {
+        exampleStringFunction = "(3.9 * 2 * (x * x) ^ 3 + x - (31 -23) * 2)";
+        try {
+            function = new Function(exampleStringFunction);
+            System.out.println("ok1");
+        } catch (InvalidFunctionException e) {
+            e.printStackTrace();
+        }
+        int x = 7;
+        assertEquals(917_646.2, function.getValueFor(x), 0.01);
+    }
 
 }

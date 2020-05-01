@@ -1,4 +1,4 @@
-package code;
+package code.GraphDrawer;
 
 public class Domain {
     public static final int Y_DOMAIN = 1;

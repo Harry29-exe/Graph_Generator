@@ -10,7 +10,6 @@ public class Main {
         graph.setColor(Color.BLUE);
         graph.drawRect(0,0,400,400);
         MainWindow mainWindow = new MainWindow(buffGraph);
-
     }
 
     /*    public static void main(String[] args) {

@@ -1,4 +1,4 @@
-package code.Function;
+package code.Function.FunctionsExceptions;
 
 public class InvalidFunctionException  extends Exception {
     String message;

@@ -1,11 +1,14 @@
 package code;
 
+import code.Function.FunctionsExceptions.InvalidFunctionException;
+import code.GraphDrawer.Domain;
+
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 
-import static code.Graph.createGraph;
+import static code.GraphDrawer.Graph.createGraph;
 
 public class MainWindow extends JFrame {
     private JPanel mainPanel;
@@ -27,7 +30,11 @@ public class MainWindow extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.out.println("listener dziala");
-                graphLabel.setIcon(new ImageIcon(createGraph(400, 400, functionField.getText(), new Domain(Domain.X_DOMAIN,10,10))) );
+                try {
+                    graphLabel.setIcon(new ImageIcon(createGraph(400, 400, functionField.getText(), new Domain(Domain.X_DOMAIN,10,10))) );
+                } catch (InvalidFunctionException ex) {
+                    ex.printStackTrace();
+                }
             }
         });
     }
@@ -48,8 +55,10 @@ public class MainWindow extends JFrame {
 
 
     private void createUIComponents() {
-        generateButton = new JButton("Generate");
+        generateButton = new JButton();
         generateButton.setText("Generate");
+
+
         graphLabel = new JLabel(new ImageIcon(this.buffGraph));
         functionField = new JTextField();
     }

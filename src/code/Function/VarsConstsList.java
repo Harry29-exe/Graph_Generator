@@ -2,7 +2,7 @@ package code.Function;
 
 import java.util.LinkedList;
 
-public class ContsVariableList {
+public class VarsConstsList {
     LinkedList<Double> constants = new LinkedList<>();
 
     public void addConst(Double constant) {

@@ -1,8 +1,10 @@
 package code.Function.FunctionNode;
 
 public enum NodeType {
-    BRACKET,
+    OPENING_BRACKET,
+    CLOSING_BRACKET,
     OPERATOR,
     CONST,
     VARIABLE,
+    BLANK,
 }

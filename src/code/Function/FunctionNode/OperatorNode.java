@@ -5,9 +5,11 @@ import static code.Function.FunctionNode.NodeType.OPERATOR;
 
 public class OperatorNode implements FunctionNode{
     char operatorType;
+    int indexInFNList;
 
-    public OperatorNode(char operatorType) {
+    public OperatorNode(char operatorType, int indexInFNList) {
         this.operatorType = operatorType;
+        this.indexInFNList = indexInFNList;
     }
 
     public char getOperatorType() {
@@ -19,6 +21,10 @@ public class OperatorNode implements FunctionNode{
         return OPERATOR;
     }
 
+    @Override
+    public int getIndexInFNList() {
+        return indexInFNList;
+    }
 
 
 }

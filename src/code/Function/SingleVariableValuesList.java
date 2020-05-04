@@ -3,7 +3,7 @@ package code.Function;
 import java.util.LinkedList;
 import java.util.List;
 
-public class VarsConstsList {
+public class SingleVariableValuesList {
     LinkedList<VarConst> constants = new LinkedList<>();
 
     public void addConst(Double constant) {

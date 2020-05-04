@@ -1,19 +1,143 @@
 package code.Function;
 
-import code.Function.FunctionNode.FunctionNodeList;
+import code.Function.Eqation.*;
+import code.Function.FunctionNode.*;
 import code.Function.FunctionsExceptions.InvalidFunctionException;
+import code.Function.FunctionsExceptions.InvalidSignException;
 
 import java.util.LinkedList;
 
+import static code.Function.FunctionNode.NodeType.*;
+
 public  class FunctionInterpreter {
     private Function function;
-    private LinkedList<Double> variables;
-
     private FunctionNodeList functionNodeList;
 
     public Function createFunction(String textFunction) throws InvalidFunctionException {
-        functionNodeList = new FunctionNodeList(textFunction);
+        try {
+            functionNodeList = new FunctionNodeList(textFunction);
+        } catch (InvalidSignException e) {
+            e.printStackTrace();
+        }
 
-        for(int i = 0; i< functionNodeList.)
+        LinkedList<Equation> equations = generateEquationList();
+
+        return new Function(functionNodeList.getVarsConsts(), equations);
     }
+
+    private LinkedList<Equation> generateEquationList() throws InvalidFunctionException {
+        LinkedList<EquationPrototype> equationPrototypes = new LinkedList<>();
+
+        int openedBraces = 0;
+        for(FunctionNode fNode : functionNodeList) {
+            NodeType nodeType = fNode.getType();
+            if(nodeType == OPENING_BRACKET) {
+                openedBraces++;
+            } else if(nodeType == CLOSING_BRACKET) {
+                if(openedBraces > 0) {
+                    openedBraces--;
+                } else {
+                    throw new InvalidFunctionException("The number of parentheses is not balanced");
+                }
+            } else if (nodeType == OPERATOR) {
+                OperatorNode operatorNode = (OperatorNode) fNode;
+                equationPrototypes.add(new EquationPrototype(
+                        ( (OperatorNode) fNode ).getOperatorType(), openedBraces, fNode.getIndexInFNList()) );
+            }
+        }
+        equationPrototypes.sort(EquationPrototype::compareTo);
+
+        LinkedList<Equation> equations = new LinkedList<>();
+        for(EquationPrototype equationPrototype : equationPrototypes) {
+            equations.add(createEquation(equationPrototype));
+        }
+
+        return equations;
+    }
+
+
+
+    private Equation createEquation(EquationPrototype equationPrototype) throws InvalidFunctionException {
+        int index = equationPrototype.getOperatorIndex();
+
+        int varIndex1;
+        int varIndex2;
+        if( functionNodeList.getPreviousVarConst(index) == null ||
+            functionNodeList.getNextVarConst(index) == null) {
+            throw new InvalidFunctionException("Please check if function is correct");
+        } else {
+            varIndex1 = ((ValueNode) functionNodeList.getPreviousVarConst(index)).getIndexInVCList();
+            varIndex2 = ((ValueNode) functionNodeList.getNextVarConst(index)).getIndexInVCList();
+        }
+
+        switch(equationPrototype.getEquationType()) {
+            case '+':
+                functionNodeList.setNodeToBlank(varIndex1);
+                return new AdditionEquation(varIndex1, varIndex2);
+            case '-':
+                functionNodeList.setNodeToBlank(varIndex1);
+                return new SubtractionEquation(varIndex1, varIndex2);
+            case '*':
+                functionNodeList.setNodeToBlank(varIndex1);
+                return new MultiplicationEquation(varIndex1, varIndex2);
+            case '/':
+                functionNodeList.setNodeToBlank(varIndex1);
+                return new DivisionEquation(varIndex1, varIndex2);
+            case '^':
+                functionNodeList.setNodeToBlank(varIndex1);
+                return new PowerEquation(varIndex1, varIndex2);
+            default:
+                throw new IllegalArgumentException();
+        }
+
+    }
+
+    private class EquationPrototype implements Comparable<EquationPrototype>{
+        private final int priority;
+        private final int operatorIndex;
+        private final char equationType;
+        @Override
+        public String toString() {
+            return new String("Priority:" + priority + " operator index: " + operatorIndex);
+        }
+
+        public EquationPrototype(char equationType, int openedBrackets, int indexInSimpleFunction) {
+            this.priority = calculatePriority(equationType, openedBrackets);
+            this.equationType = equationType;
+            this.operatorIndex = indexInSimpleFunction;
+        }
+
+        private int calculatePriority(char equationType, int openedBraces) {
+            int result = openedBraces * 3;
+            if(equationType == '+' || equationType == '-') {
+                return result + 1;
+            } else if (equationType  == '*' || equationType == '/') {
+                return result + 2;
+            } else if (equationType == '^') {
+                return result + 3;
+            } else {
+                throw new IllegalArgumentException();
+            }
+        }
+
+        @Override
+        public int compareTo(EquationPrototype eNode) {
+            return eNode.getPriority() - this.priority;
+        }
+
+        public int getPriority() {
+            return priority;
+        }
+
+        public int getOperatorIndex() {
+            return operatorIndex;
+        }
+
+        public char getEquationType() {
+            return equationType;
+        }
+    }
+
+
+
 }

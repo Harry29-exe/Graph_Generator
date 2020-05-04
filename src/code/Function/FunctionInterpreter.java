@@ -16,12 +16,15 @@ public  class FunctionInterpreter {
     public Function createFunction(String textFunction) throws InvalidFunctionException {
         try {
             functionNodeList = new FunctionNodeList(textFunction);
+            System.out.println(functionNodeList);
         } catch (InvalidSignException e) {
             e.printStackTrace();
         }
 
         LinkedList<Equation> equations = generateEquationList();
-
+        for(Equation equation : equations) {
+            System.out.println("[" + equation.neededVariablesIndexes()[0] + equation.neededVariablesIndexes()[1] + "]");
+        }
         return new Function(functionNodeList.getVarsConsts(), equations);
     }
 
@@ -62,29 +65,31 @@ public  class FunctionInterpreter {
 
         int varIndex1;
         int varIndex2;
+        int var1NodeIndex;
         if( functionNodeList.getPreviousVarConst(index) == null ||
             functionNodeList.getNextVarConst(index) == null) {
             throw new InvalidFunctionException("Please check if function is correct");
         } else {
+            var1NodeIndex = functionNodeList.getPreviousVarConst(index).getIndexInFNList();
             varIndex1 = ((ValueNode) functionNodeList.getPreviousVarConst(index)).getIndexInVCList();
             varIndex2 = ((ValueNode) functionNodeList.getNextVarConst(index)).getIndexInVCList();
         }
 
         switch(equationPrototype.getEquationType()) {
             case '+':
-                functionNodeList.setNodeToBlank(varIndex1);
+                functionNodeList.setNodeToBlank(var1NodeIndex);
                 return new AdditionEquation(varIndex1, varIndex2);
             case '-':
-                functionNodeList.setNodeToBlank(varIndex1);
+                functionNodeList.setNodeToBlank(var1NodeIndex);
                 return new SubtractionEquation(varIndex1, varIndex2);
             case '*':
-                functionNodeList.setNodeToBlank(varIndex1);
+                functionNodeList.setNodeToBlank(var1NodeIndex);
                 return new MultiplicationEquation(varIndex1, varIndex2);
             case '/':
-                functionNodeList.setNodeToBlank(varIndex1);
+                functionNodeList.setNodeToBlank(var1NodeIndex);
                 return new DivisionEquation(varIndex1, varIndex2);
             case '^':
-                functionNodeList.setNodeToBlank(varIndex1);
+                functionNodeList.setNodeToBlank(var1NodeIndex);
                 return new PowerEquation(varIndex1, varIndex2);
             default:
                 throw new IllegalArgumentException();

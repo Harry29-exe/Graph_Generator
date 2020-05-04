@@ -18,4 +18,9 @@ public class BlankNode implements FunctionNode {
     public int getIndexInFNList() {
         return indexInFNList;
     }
+
+    @Override
+    public String toString() {
+        return "BLANK";
+    }
 }

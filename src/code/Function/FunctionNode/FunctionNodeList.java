@@ -17,19 +17,28 @@ public class FunctionNodeList implements Iterable<FunctionNode>{
 
     public FunctionNodeList(String textFunction) throws InvalidFunctionException, InvalidSignException {
         int variableCount = 0;
-        boolean changeNextValueToNegative;
+        boolean nextValIsNegative = false;
 
         for (int i = 0; i < textFunction.length(); i++) {
             char c = textFunction.charAt(i);
             if ((c >= '0' && c <= '9')) {
                 simpleFunction.add(new ConstantNode(variableCount++, simpleFunction.size()));
-                int j = goToEndOfNumber(textFunction, i) - 1;
-                varsConsts.addConst(Double.parseDouble
-                        (textFunction.substring(i, j)));
-                i = j;
+                int j = goToEndOfNumber(textFunction, i);
+                if(i == j) {
+                    System.out.println(textFunction.charAt(i) + "");
+                    varsConsts.addConst(Double.parseDouble(textFunction.charAt(i) + ""), nextValIsNegative);
+                    nextValIsNegative = false;
+                } else {
+                    varsConsts.addConst(Double.parseDouble
+                            (textFunction.substring(i, j)), nextValIsNegative);
+                    System.out.println(textFunction.substring(i, j));
+                    nextValIsNegative = false;
+                    i = j-1;
+                }
             } else if (c == 'x' || c == 'X') {
                 simpleFunction.add(new VariableNode("x", variableCount++, simpleFunction.size()));
-                varsConsts.addX();
+                varsConsts.addX(nextValIsNegative);
+                nextValIsNegative = false;
             } else {
                 switch (c) {
                     case '(':
@@ -42,16 +51,14 @@ public class FunctionNodeList implements Iterable<FunctionNode>{
                         simpleFunction.add(new OperatorNode('+', simpleFunction.size()));
                         break;
                     case '-':
-                        if(isMinusSignAnOperator(i)) {
-                            simpleFunction.add(new OperatorNode('-', simpleFunction.size()));
+                        if (!isMinusSignOperator(simpleFunction.size())) {
+                            nextValIsNegative = true;
                             break;
-                        } else {
-                            simpleFunction.add(i-1, new ConstantNode(variableCount++, i-1));
-                            varsConsts.addConst(0.0);
-                            simpleFunction.add(new OperatorNode('-', simpleFunction.size()));
                         }
-
+                        simpleFunction.add(new OperatorNode('-', simpleFunction.size()));
+                        break;
                     case '*':
+                        System.out.println("ok");
                         simpleFunction.add(new OperatorNode('*', simpleFunction.size()));
                         break;
                     case '/':
@@ -60,14 +67,8 @@ public class FunctionNodeList implements Iterable<FunctionNode>{
                     case '^':
                         simpleFunction.add(new OperatorNode('^', simpleFunction.size()));
                         break;
-                    /*case 'E':
-                        if (textFunction.charAt(i+1) == 'N' && textFunction.charAt(i+2) == 'D'
-                                && i+3 == textFunction.length()) {
-                            i = i + 3;
-                        } else {
-                            throw new InvalidFunctionException("Please check if function is correct.");
-                        }*/
                     case '.':
+                    case ',':
                     case ' ':
                         break;
                     default:
@@ -93,6 +94,15 @@ public class FunctionNodeList implements Iterable<FunctionNode>{
     @Override
     public Iterator<FunctionNode> iterator() {
         return simpleFunction.iterator();
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder s = new StringBuilder();
+        for(FunctionNode fn : simpleFunction) {
+            s.append(fn);
+        }
+        return s.toString();
     }
 
     public void setNodeToBlank(int index) {
@@ -151,32 +161,36 @@ public class FunctionNodeList implements Iterable<FunctionNode>{
         return simpleFunction.get(index);
     }
 
-    private boolean isMinusSignAnOperator(int minusIndex) {
+    private boolean isMinusSignOperator(int minusIndex) {
         int i = minusIndex - 1;
-        while(simpleFunction.get(i).getType() == OPENING_BRACKET || simpleFunction.get(i).getType() == CLOSING_BRACKET) {
-            if(i>0) {
-                i--;
-            } else {
-                return false;
+        if(i >= 0) {
+            while (simpleFunction.get(i).getType() == OPENING_BRACKET || simpleFunction.get(i).getType() == CLOSING_BRACKET) {
+                System.out.println(this);
+                if(i > 0) {
+                    i--;
+                } else {
+                    return false;
+                }
             }
-        }
-        if(simpleFunction.get(i).getType() == OPERATOR) {
-            return false;
+            return simpleFunction.get(i).getType() != OPERATOR;
+
         } else {
-            return true;
+            return false;
         }
     }
 
     private int goToEndOfNumber(String string, int fromN) throws IllegalArgumentException{
         while(true) {
-            char c = string.charAt(fromN++);
-            if( (c > '9' || c < '0') && c != '.') {
-                return fromN - 1;
-            } else if (c == '.') {
-                c = string.charAt(fromN++);
-                if(c < '0' || c > '9') {
-                    throw new IllegalArgumentException("After the decimal point a digit must appear");
+            if(fromN < string.length() ) {
+                char c = string.charAt(fromN);
+
+                if ((c > '9' || c < '0') && c != '.') {
+                    System.out.println(c+"");
+                    return fromN;
                 }
+                fromN++;
+            } else {
+                return fromN-1;
             }
         }
     }

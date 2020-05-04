@@ -10,9 +10,18 @@ public class SingleVariableValuesList {
         constants.addLast(new VarConst(false, constant));
     }
 
+    public void addConst(Double constant, boolean isNegative) {
+        constants.addLast(new VarConst(isNegative, constant));
+    }
+
     public void addX() {
         constants.addLast(new VarConst(false, null));
     }
+
+    public void addX(boolean isNegative) {
+        constants.addLast(new VarConst(isNegative, null));
+    }
+
 
     public double[] getNumbersArray(double x) {
         double[] numbers = new double[constants.size()];
@@ -32,6 +41,9 @@ public class SingleVariableValuesList {
                 }
             }
         }
+        /*for(VarConst vC : constants) {
+            System.out.println(vC);
+        }*/
         return numbers;
     }
 
@@ -42,6 +54,15 @@ public class SingleVariableValuesList {
         public VarConst(boolean isNegative, Double value) {
             this.isNegative = isNegative;
             this.value = value;
+        }
+
+        @Override
+        public String toString() {
+            if(isNegative) {
+                return "-" + value;
+            } else {
+                return value + "";
+            }
         }
     }
 }

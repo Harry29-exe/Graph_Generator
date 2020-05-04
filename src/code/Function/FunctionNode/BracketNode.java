@@ -25,4 +25,13 @@ public class BracketNode implements FunctionNode{
     public NodeType getType() {
         return nodeType;
     }
+
+    @Override
+    public String toString() {
+        if(nodeType == OPENING_BRACKET) {
+            return "(";
+        } else {
+            return ")";
+        }
+    }
 }

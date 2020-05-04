@@ -26,5 +26,10 @@ public class OperatorNode implements FunctionNode{
         return indexInFNList;
     }
 
+    @Override
+    public String toString() {
+        return operatorType + "";
+    }
+
 
 }

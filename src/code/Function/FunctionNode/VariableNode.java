@@ -31,4 +31,9 @@ public class VariableNode implements ValueNode {
     public int getIndexInVCList() {
         return indexInVCList;
     }
+
+    @Override
+    public String toString() {
+        return indexInVCList + "";
+    }
 }

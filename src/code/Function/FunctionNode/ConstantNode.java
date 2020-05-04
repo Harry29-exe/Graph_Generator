@@ -27,4 +27,9 @@ public class ConstantNode implements ValueNode {
     public int getIndexInVCList() {
         return indexInVCList;
     }
+
+    @Override
+    public String toString() {
+        return indexInVCList + "";
+    }
 }

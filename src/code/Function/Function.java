@@ -13,7 +13,7 @@ public class Function {
         this.equations = equations;
     }
 
-    public double getValueForX(double x) {
+    public double getValueFor(double x) {
         double[] values = varsConsts.getNumbersArray(x);
         for(Equation equation : equations) {
             int valIndex1 = equation.neededVariablesIndexes()[0];

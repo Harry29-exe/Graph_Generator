@@ -1,6 +1,5 @@
 package code.GraphDrawer;
 
-import code.Function.DepreciatedFunction;
 import code.Function.Function;
 import code.Function.FunctionInterpreter;
 import code.Function.FunctionsExceptions.InvalidFunctionException;

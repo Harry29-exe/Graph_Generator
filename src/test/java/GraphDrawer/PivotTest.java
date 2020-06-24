@@ -1,13 +1,11 @@
-package code.GraphDrawer;
+package GraphDrawer;
 
+import code.GraphDrawer.Pivot;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
 public class PivotTest {
-
-
-
 
     @Test
     public void pixelsToX_Test() {
